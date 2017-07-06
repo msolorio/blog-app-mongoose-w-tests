@@ -30,7 +30,7 @@ function generateBlogPostData() {
     },
     title: faker.lorem.words(),
     content: generateContent(),
-    created: faker.date.past()
+    created: new Date().toISOString()
   };
 }
 
@@ -90,7 +90,7 @@ describe('Blog Post API resource', function() {
         })
         // prove number of posts returned from POST is equal to number of posts in DB
         .then(function(count) {
-          console.log('res.body:', res.body);
+          // console.log('res.body:', res.body);
           res.body.should.have.lengthOf(count);
         });
     });
@@ -105,11 +105,11 @@ describe('Blog Post API resource', function() {
             post.should.include.keys('id', 'author', 'content', 'title', 'created');
           });
           singleBlogPost = res.body[0];
-          console.log('singleBlogPost:', singleBlogPost);
+          // console.log('singleBlogPost:', singleBlogPost);
           return BlogPost.findById(singleBlogPost.id);
         })
         .then(function(singlePostFromDb) {
-          console.log('singlePostFromDb:', singlePostFromDb);
+          // console.log('singlePostFromDb:', singlePostFromDb);
 
           singlePostFromDb.id.should.equal(singleBlogPost.id);
           `${singlePostFromDb.author.firstName} ${singlePostFromDb.author.lastName}`.should.equal(singleBlogPost.author);
@@ -118,9 +118,40 @@ describe('Blog Post API resource', function() {
           singlePostFromDb.content.should.equal(singleBlogPost.content);
         });
     });
-
-
-      
   });
+
+  describe('POST endpoint', function() {
+
+    it('should add a new blog post', function() {
+
+      const newBlogPost = generateBlogPostData();
+      return chai.request(app)
+        .post('/posts')
+        .send(newBlogPost)
+        .then(function(res) {
+          res.should.have.status(201);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.should.include.keys(
+            'id', 'author', 'title', 'content', 'created'
+          );
+          // if response has id we know object was created in DB
+          res.body.id.should.not.be.null;
+          res.body.author.should.equal(`${newBlogPost.author.firstName} ${newBlogPost.author.lastName}`);
+          res.body.title.should.equal(newBlogPost.title);
+          res.body.content.should.equal(newBlogPost.content);
+
+          return BlogPost.findById(res.body.id);
+        })
+        .then(function(blogPostInDb) {
+          blogPostInDb.author.firstName.should.equal(newBlogPost.author.firstName);
+          blogPostInDb.author.lastName.should.equal(newBlogPost.author.lastName);
+          blogPostInDb.title.should.equal(newBlogPost.title);
+          blogPostInDb.content.should.equal(newBlogPost.content);
+        });
+    });
+  });
+
+  
 
 });
