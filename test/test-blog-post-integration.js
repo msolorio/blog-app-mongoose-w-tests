@@ -152,6 +152,51 @@ describe('Blog Post API resource', function() {
     });
   });
 
-  
+  describe('PUT endpoint', function() {
+    // - retrieve existing blog post from DB
+    // - make PUT request with chai to update blog post
+    // - test if post returned by PUT matches data sent over
+    // - test if post in DB matches data sent over
+
+    it('should update fields sent over', function() {
+
+      const updateData = {
+        title: 'Nice Title',
+        content: 'here is some content. here is some more content. and it just keeps going. and it\'s done'
+      };
+
+      let res;
+
+      return BlogPost
+        .findOne()
+        .exec()
+        .then(function(blogPost) {
+          updateData.id = blogPost.id;
+
+          return chai.request(app)
+            .put(`/posts/${blogPost.id}`)
+            .send(updateData);
+        })
+        .then(function(_res) {
+          res = _res;
+          res.should.have.status(200);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.should.include.keys(
+            'id', 'author', 'title', 'content', 'created'
+          );
+          res.body.title.should.equal(updateData.title);
+          res.body.content.should.equal(updateData.content);
+
+          return BlogPost.findById(updateData.id).exec();
+        })
+        .then(function(blogPost) {
+          blogPost.title.should.equal(updateData.title);
+          blogPost.content.should.equal(updateData.content);
+          `${blogPost.author.firstName} ${blogPost.author.lastName}`.should.equal(res.body.author);
+        });
+    });
+
+  });
 
 });
