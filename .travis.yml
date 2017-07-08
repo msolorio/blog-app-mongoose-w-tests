@@ -1,0 +1,11 @@
+language: node_js
+node_js: node
+services:
+- mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: HqFBsfb0AQfNo8X6wVFO6Jg7raC0grs2gCuJPPUNU1omuaSOxu6+4A4SDL01gyyDba1EQ1G/Fa0amsliUbFwPmNbuHx7w3fHjLwez3sJqZkHzteT1OM1JQXQbav+qMXCHux1bWkwY2+Sl7Bq5dB/ns2I6DnpbqORW1yIrokwWunpoDExQcj4enRKj3OmlYqw6A3y955xbaqrYBHWKiEYzkJBSKjSUypiK7+/WXl1usrdFuFv/BgQ5XLJt8bXQoj4rgrQKXSerQQuUtuE4KBUJyL1nPVMOmYTYRwJM+e42E/8IT8Xvy2RlAUalOuyW1KSSG6wN+8lHguyVX6KJCh532foxbXnA3qnanMQTWrtVCa/zOXV9tR61n4Ki8Gm+jYrKC6jwvhPg2dORQhGhFYThTHKHtcSe7p+SpBZzv2gtSOqNBZMhjOjgLQASEA1gpgipHo00+tc5qELPx8EamcTSsF8Hxo8k3mYced3Xjn1b4LKKTYYAobO5ioohnYY58Yk1CRU7/kqF5uwpD3rH6qaKbXKPW7tMUB3Fixc6fEUXDPUprEBbEcEj+o5C+iC4tHz8GY1uOur/HS07kP7EkLXRV+y2MW1zeDOAw9oLjV4CcWSdpCF0A6mNB/R6dNTaPWIQ1K3yXtzxVo8GE9tGw95IRQw6lMLXid++JFoPk+d3Tk=
+  app: murmuring-headland-14628
+  on:
+    repo: msolorio/blog-app-mongoose-w-tests

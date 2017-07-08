@@ -49,8 +49,6 @@ function tearDownDb() {
   return mongoose.connection.dropDatabase();
 }
 
-console.log('running tests');
-
 describe('Blog Post API resource', function() {
 
   before(function() {
