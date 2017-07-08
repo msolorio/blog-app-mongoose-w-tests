@@ -2,6 +2,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const faker = require('faker');
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 const should = chai.should();
 
@@ -20,7 +21,6 @@ function generateContent() {
   return content;
 }
 
-// TODO: BUILD FUNCTION THAT RETURNS A RANDOM BLOGPOST WITH FAKER
 function generateBlogPostData() {
 
   return {
@@ -74,8 +74,6 @@ describe('Blog Post API resource', function() {
     it('should return all existing restaurants', function() {
       let res;
 
-      // prove response has correct status
-      // prove db seeded correctly
       return chai.request(app)
         .get('/posts')
         .then(function(_res) {
@@ -88,9 +86,7 @@ describe('Blog Post API resource', function() {
 
           return BlogPost.count();
         })
-        // prove number of posts returned from POST is equal to number of posts in DB
         .then(function(count) {
-          // console.log('res.body:', res.body);
           res.body.should.have.lengthOf(count);
         });
     });
@@ -105,12 +101,9 @@ describe('Blog Post API resource', function() {
             post.should.include.keys('id', 'author', 'content', 'title', 'created');
           });
           singleBlogPost = res.body[0];
-          // console.log('singleBlogPost:', singleBlogPost);
           return BlogPost.findById(singleBlogPost.id);
         })
         .then(function(singlePostFromDb) {
-          // console.log('singlePostFromDb:', singlePostFromDb);
-
           singlePostFromDb.id.should.equal(singleBlogPost.id);
           `${singlePostFromDb.author.firstName} ${singlePostFromDb.author.lastName}`.should.equal(singleBlogPost.author);
           singlePostFromDb.title.should.equal(singleBlogPost.title);
@@ -141,6 +134,12 @@ describe('Blog Post API resource', function() {
           res.body.title.should.equal(newBlogPost.title);
           res.body.content.should.equal(newBlogPost.content);
 
+          // takes date as a string and converts to a moment date
+          const date1 = moment(res.body.created);
+          const date2 = moment(newBlogPost.created);
+
+          date1.isSame(date2, 'second').should.be.true;
+
           return BlogPost.findById(res.body.id);
         })
         .then(function(blogPostInDb) {
@@ -153,10 +152,6 @@ describe('Blog Post API resource', function() {
   });
 
   describe('PUT endpoint', function() {
-    // - retrieve existing blog post from DB
-    // - make PUT request with chai to update blog post
-    // - test if post returned by PUT matches data sent over
-    // - test if post in DB matches data sent over
 
     it('should update fields sent over', function() {
 
@@ -196,6 +191,41 @@ describe('Blog Post API resource', function() {
           `${blogPost.author.firstName} ${blogPost.author.lastName}`.should.equal(res.body.author);
         });
     });
+
+    describe('DELETE endpoint', function() {
+      it('delete a blog post by id', function() {
+
+        let blogPost;
+
+        return BlogPost
+          .findOne()
+          .exec()
+          .then(function(_blogPost) {
+            blogPost = _blogPost;
+            return chai.request(app)
+              .delete(`/posts/${blogPost.id}`);
+          })
+          .then(function(res) {
+            res.should.have.status(204);
+            return BlogPost.findById(blogPost.id).exec();
+          })
+          .then(function(_blogPost) {
+            should.not.exist(_blogPost);
+          });
+      });
+    });
+
+    it('throw error when passing incorrect id', function() {
+
+      return chai.request(app)
+        .delete(`/posts/1111111`)
+        .then(function(res) {
+          res.should.have.status(500);
+        })
+        .catch(function(res) {
+          res.should.have.status(500);
+        });
+    })
 
   });
 
